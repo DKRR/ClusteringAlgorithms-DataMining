@@ -53,6 +53,9 @@ public class KMeans {
                 }
                 dataMatrix[i][columns - 1] = Double.parseDouble(geneAttributes[1]);
             }
+
+
+
         } catch (Exception ex) {
 
         }
