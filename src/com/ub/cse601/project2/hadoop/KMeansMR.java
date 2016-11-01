@@ -1,16 +1,14 @@
-package com.ub.cse601.project2.KMeansMapReduce;
+package com.ub.cse601.project2.hadoop;
 
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by nitish on 10/31/16.
