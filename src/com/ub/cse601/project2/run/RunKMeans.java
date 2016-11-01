@@ -2,6 +2,7 @@ package com.ub.cse601.project2.run;
 
 import com.ub.cse601.project2.clustering.KMeans;
 
+import java.util.Arrays;
 import java.util.Scanner;
 
 /**
@@ -23,6 +24,9 @@ public class RunKMeans {
         kMeans.readGeneDataSet(path);
         double[][] distanceMatrix = kMeans.calculateDistanceMatrix();
         double[][] initKMeans = kMeans.initKMeans();
+        /*Arrays.stream(initKMeans).forEach(x->{
+            System.out.println(Arrays.toString(x));
+        });*/
         kMeans.runKMeans(initKMeans);
     }
 }

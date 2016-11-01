@@ -33,7 +33,12 @@ public class KMeans {
         this.maxIterations = maxIterations;
     }
 
-    public void readGeneDataSet(String path) throws IOException, FileNotFoundException {
+
+    public KMeans(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public double[][] readGeneDataSet(String path) throws IOException, FileNotFoundException {
         Path filePath = null;
         try {
             filePath = Paths.get(path, fileName);
@@ -59,6 +64,8 @@ public class KMeans {
         } catch (Exception ex) {
 
         }
+
+        return dataMatrix;
     }
 
     public double[][] calculateDistanceMatrix() {
@@ -81,20 +88,16 @@ public class KMeans {
 
     public double[][] initKMeans() {
         double[][] kMeans = new double[initialCentroids][];
-        double[][] clusterIndex = new double[dataMatrix.length][initialCentroids];
         int k = 0;
         Random rand = new Random();
         List<Integer> clusterIndices = new ArrayList<Integer>();
-
-        this.clusters = new HashMap<Integer, List<double[][]>>();
         while (k < initialCentroids) {
             int centroidIndex = rand.nextInt(dataMatrix.length);
             if (clusterIndices.contains(centroidIndex)) continue;
             else {
-                clusters.put(k + 1, new ArrayList<double[][]>());
                 clusterIndices.add(centroidIndex);
                 kMeans[k] = Arrays.copyOfRange(dataMatrix[centroidIndex], 1, attributeCount + 1);
-                Arrays.stream(kMeans[k]).forEach(x->{
+                Arrays.stream(kMeans[k]).forEach(x -> {
                     x = new BigDecimal(x).setScale(2, RoundingMode.HALF_UP).doubleValue();
                 });
                 k++;
@@ -115,7 +118,7 @@ public class KMeans {
                 int minClusterIndex = 0;
                 for (int k = 0; k < kMeans.length; k++) {
                     for (int j = 1; j <= attributeCount; j++) {
-                        squaredDistance += Math.pow(dataMatrix[i][j] - kMeans[k][j-1], 2);
+                        squaredDistance += Math.pow(dataMatrix[i][j] - kMeans[k][j - 1], 2);
                     }
                     eucdDis = Math.sqrt(squaredDistance);
                     if (eucdDis < minDistance) {
@@ -136,28 +139,52 @@ public class KMeans {
                         sum += clusterObject[col];
                     }
                     double centroid = sum / clusterObjects.size();
-                    newKMeans[k][col-1] = new BigDecimal(centroid).setScale(2, RoundingMode.HALF_UP).doubleValue();
+                    newKMeans[k][col - 1] = new BigDecimal(centroid).setScale(2, RoundingMode.HALF_UP).doubleValue();
                 }
             }
             if (checkConvergence(kMeans, newKMeans)) converged = true;
             iterations++;
             kMeans = newKMeans;
         }
-        System.out.println("K-Means converged after " + (iterations-1) + " iterations");
+        System.out.println("K-Means converged after " + (iterations - 1) + " iterations");
         printClusters(kMeans);
+        System.out.println("Performing Cluster validation...");
+        System.out.println("Jaccard Coefficient: " + calaculateJaccardCoefficient());
     }
 
     private boolean checkConvergence(double[][] oldKMeans, double[][] newKMeans) {
         return Arrays.deepEquals(oldKMeans, newKMeans);
     }
 
-    private void printClusters(double[][] kMeans){
-        for(int i=0;i<kMeans.length; i++){
+    private void printClusters(double[][] kMeans) {
+        for (int i = 0; i < kMeans.length; i++) {
             double clsIndx = i + 1;
             List<double[]> clusterObjects = Arrays.stream(dataMatrix).filter(x -> x[clusterIndex] == clsIndx).collect(Collectors.toList());
             Arrays.stream(dataMatrix).filter(x -> x[clusterIndex] == clsIndx).collect(Collectors.toList());
-            System.out.println("Cluster "+new Double(clsIndx).intValue()+" size: "+clusterObjects.size());
+            System.out.println("Cluster " + new Double(clsIndx).intValue() + " size: " + clusterObjects.size());
         }
+    }
+
+    private double calaculateJaccardCoefficient() {
+        int countAgree = 0;
+        int countDisagree = 0;
+        for (int i = 0; i < dataMatrix.length - 1; i++) {
+            for (int j = i; j < dataMatrix.length; j++) {
+                if (dataMatrix[i][clusterIndex] == dataMatrix[j][clusterIndex] &&
+                        dataMatrix[i][clusterIndex - 1] == dataMatrix[j][clusterIndex - 1] &&
+                        dataMatrix[i][clusterIndex - 1] != -1) {
+                    countAgree++;
+                } else if (dataMatrix[i][clusterIndex] == dataMatrix[j][clusterIndex] &&
+                        dataMatrix[i][clusterIndex - 1] != dataMatrix[j][clusterIndex - 1] ||
+                        (dataMatrix[i][clusterIndex] != dataMatrix[j][clusterIndex] &&
+                                dataMatrix[i][clusterIndex - 1] == dataMatrix[j][clusterIndex - 1]) &&
+                                dataMatrix[i][clusterIndex - 1] != -1) {
+                    countDisagree++;
+                }
+
+            }
+        }
+        return (double) countAgree / (countAgree + countDisagree);
     }
 
 
