@@ -15,7 +15,7 @@ public class RunKMeans {
         System.out.println("Enter No. of Clusters to start with: ");
         int k = sc.nextInt();
         System.out.println("Enter File name of data set: ");
-        String fileName = sc.next();
+        String fileName = 5sc.next();
         if(fileName==null || fileName.length()==0) fileName = "cho.txt";
         String path = "data/";
         System.out.println("Enter Max Iterations: ");
