@@ -1,14 +1,25 @@
 package com.ub.cse601.project2.hadoop;
 
+import org.apache.hadoop.mapreduce.Mapper;
+
+//import javax.security.auth.login.Configuration;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+//import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+
+import javax.xml.soap.Text;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by nitish on 10/31/16.
@@ -33,6 +44,69 @@ public class KMeansMR {
         this.maxIterations = maxIterations;
 
     }
+
+    private static class KMeansMapper extends Mapper<Text, Text, IntWritable, Text> {
+
+        private ArrayList<Double[]> centroidList = new ArrayList<Double[]>();
+
+        protected void setup(Context context) throws IOException, InterruptedException {
+
+            try {
+
+
+                super.setup(context);
+                Configuration conf = context.getConfiguration();
+
+                String filePath = "data/";
+                String fileName = "initialCentroid.txt";
+                Path centroidFilePath = Paths.get(filePath, fileName);
+
+                List<String> centroidData = Files.readAllLines(centroidFilePath, StandardCharsets.UTF_8);
+                //TODO: check whether you need to remove last row
+
+                for ( String singleGeneString : centroidData ) {
+
+                    if ( singleGeneString != null || singleGeneString != "" ) {
+
+                        String[] expressions = singleGeneString.split("\t");
+                        Double[] singleGeneExpressionStore = new Double[singleGeneString.split("\t").length];
+
+                        for ( int i = 0; i < expressions.length; i++ ) {
+
+                            singleGeneExpressionStore[i] = Double.valueOf(expressions[i]);
+
+                        }
+
+                        centroidList.add(singleGeneExpressionStore);
+
+                    }
+
+                }
+
+
+
+            } catch ( Exception e ) {
+
+                e.printStackTrace();
+
+            }
+
+        }
+
+
+        protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
+
+            /*
+            * -- iterate over the data matrix
+            *   -- then for each entry in data matrix iterate over each centroid to see in which centroid the */
+
+
+
+        }
+
+    }
+
+
 
     /*
     * This function picks a set of random initial centroids
@@ -82,6 +156,7 @@ public class KMeansMR {
             try {
 
                 Arrays.stream(kMeans).forEach(singleArray -> {
+
                     try {
 
                         String line = Arrays.stream(singleArray).mapToObj(i -> String.valueOf(i)).collect(Collectors.joining("\t"));
