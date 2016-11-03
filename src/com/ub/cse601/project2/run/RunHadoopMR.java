@@ -42,7 +42,7 @@ public class RunHadoopMR {
             String path = "data/input/";
             KMeansMR mapReduceObject = new KMeansMR(5, fileName, 100);
             mapReduceObject.readGeneDataSet(path);
-            mapReduceObject.writeInitialCentroidsToFile(path, "initialCentroids.txt");
+            //mapReduceObject.writeInitialCentroidsToFile(path, "initialCentroids.txt");
 
             Configuration conf = new Configuration();
             Job job = Job.getInstance(conf);

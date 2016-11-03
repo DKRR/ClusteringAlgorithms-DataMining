@@ -168,7 +168,7 @@ public class KMeansMR {
             mapKeyOutput.set(closestCentroid.toString());
             mapValueOutput.set(singleExpValue.toString());
 
-            context.write(mapKeyOutput, mapValueOutput);
+            context.write(mapKeyOutput, value);
 
 
         }
@@ -228,9 +228,10 @@ public class KMeansMR {
         protected void reduce(Text key, Iterable<Text> value, Context context) throws IOException, InterruptedException {
 
             int genesLength = value.toString().split("\t").length - 1;
+            System.out.println(genesLength);
             Double[] newCentroidExp = new Double[genesLength];
             int genesCount = 0;
-            List<Double> clusterGenePoints = new ArrayList<>();
+            List<Integer> clusterGenePoints = new ArrayList<Integer>();
 
             for (Text eachValue: value) {
 
@@ -238,10 +239,10 @@ public class KMeansMR {
                 genesCount = genesCount + 1;
                 String singleGeneExpression = eachValue.toString();
                 String[] singleGeneExpSplit = singleGeneExpression.split("\t");
-                System.out.println(Arrays.toString(singleGeneExpSplit));
+                //System.out.println(Arrays.toString(singleGeneExpSplit));
 
                 System.out.println("singleGeneExpSplit[0] = " + singleGeneExpSplit[0]);
-                //clusterGenePoints.add((singleGeneExpSplit[0]);
+                clusterGenePoints.add(Integer.parseInt(singleGeneExpSplit[0]));
                 Double[] singleGeneDouble = new Double[singleGeneExpression.split("\t").length];
 
 
@@ -249,11 +250,7 @@ public class KMeansMR {
 
                     singleGeneDouble[i] = Double.valueOf(singleGeneExpSplit[i]);
 
-                    if(i>0){
-                        newCentroidExp[i-1] = newCentroidExp[i-1] + Double.valueOf(singleGeneExpSplit[i]);
-                    }
-
-
+                    newCentroidExp[i-1] = newCentroidExp[i-1] + Double.valueOf(singleGeneExpSplit[i]);
 
                 }
 
