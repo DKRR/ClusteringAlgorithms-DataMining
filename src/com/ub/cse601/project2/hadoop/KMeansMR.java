@@ -60,7 +60,6 @@ public class KMeansMR {
 
                 super.setup(context);
                 Configuration conf = context.getConfiguration();
-                conf.get("")
 
                 String filePath = "data/input/";
                 String fileName = "initialCentroids.txt";
