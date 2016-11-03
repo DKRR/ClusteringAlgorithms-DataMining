@@ -49,8 +49,8 @@ public class KMeansMR {
 
     public static class KMeansMapper extends Mapper<LongWritable, Text, Text, Text> {
 
-        private ArrayList<Double[]> centroidList = new ArrayList<Double[]>();
-        private ArrayList<Double[]> geneIndexExpList = new ArrayList<Double[]>();
+        private List<Double[]> centroidList = new ArrayList<Double[]>();
+        private List<Double[]> geneIndexExpList = new ArrayList<Double[]>();
 
 
         protected void setup(Context context) throws IOException, InterruptedException {
@@ -60,6 +60,7 @@ public class KMeansMR {
 
                 super.setup(context);
                 Configuration conf = context.getConfiguration();
+                conf.get("")
 
                 String filePath = "data/input/";
                 String fileName = "initialCentroids.txt";
