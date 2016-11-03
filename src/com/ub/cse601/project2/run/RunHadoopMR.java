@@ -8,6 +8,7 @@ import com.sun.imageio.spi.FileImageInputStreamSpi;
 import com.sun.xml.bind.v2.TODO;
 import com.ub.cse601.project2.hadoop.KMeansMR;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapred.*;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
@@ -39,11 +40,12 @@ public class RunHadoopMR {
 
             }*/
 
-            String path = "data/input/";
+            String datapath = "data/input/";
+            String centroidpath = "data/centroids/";
             //KMeansMR mapReduceObject = new KMeansMR(5, fileName, 100);
             KMeansMR mapReduceObject = new KMeansMR(5, "cho.txt", 100);
-            mapReduceObject.readGeneDataSet(path);
-            mapReduceObject.writeInitialCentroidsToFile(path, "initialCentroids.txt");
+            mapReduceObject.readGeneDataSet(datapath);
+            mapReduceObject.writeInitialCentroidsToFile(centroidpath, "initialCentroids.txt");
 
             Configuration conf = new Configuration();
             Job job = Job.getInstance(conf);
@@ -55,6 +57,8 @@ public class RunHadoopMR {
 
             Path in = new Path("data/input/");
             Path out = new Path("data/output/");
+            job.setMapOutputKeyClass(IntWritable.class);
+            job.setMapOutputValueClass(Text.class);
             job.setOutputKeyClass(Text.class);
             job.setOutputValueClass(Text.class);
 

@@ -47,10 +47,9 @@ public class KMeansMR {
 
     }
 
-    public static class KMeansMapper extends Mapper<LongWritable, Text, Text, Text> {
+    public static class KMeansMapper extends Mapper<LongWritable, Text, IntWritable, Text> {
 
         private ArrayList<Double[]> centroidList = new ArrayList<Double[]>();
-        private ArrayList<Double[]> geneIndexExpList = new ArrayList<Double[]>();
 
 
         protected void setup(Context context) throws IOException, InterruptedException {
@@ -61,12 +60,11 @@ public class KMeansMR {
                 super.setup(context);
                 Configuration conf = context.getConfiguration();
 
-                String filePath = "data/input/";
+                String filePath = "data/centroids/";
                 String fileName = "initialCentroids.txt";
                 Path centroidFilePath = Paths.get(filePath, fileName);
 
                 List<String> centroidData = Files.readAllLines(centroidFilePath, StandardCharsets.UTF_8);
-                //TODO: check whether you need to remove last row
 
                 for ( String singleGeneString : centroidData ) {
 
@@ -82,39 +80,10 @@ public class KMeansMR {
                         }
 
                         centroidList.add(singleCentroidExpressionStore);
-                        System.out.println("centroid values " +singleCentroidExpressionStore.toString());
 
                     }
 
                 }
-
-                System.out.println("centorid list = " + centroidList.toString());
-
-                /*String dataFilePath = "data/";
-                String dataFileName = "cho.txt";
-                Path genePath = Paths.get(dataFilePath, dataFileName);
-
-                List<String> geneIndexExpData = Files.readAllLines(genePath, StandardCharsets.UTF_8);
-
-                for(String eachGeneString : geneIndexExpData){
-
-                    String[] eachGeneExpValues = eachGeneString.split("\t");
-                    Double[] singleGeneExpressionStore = new Double[eachGeneString.split("\t").length];
-
-                    for ( int i = 0; i < eachGeneExpValues.length; i++ ) {
-
-                        if(i>1) {
-                            singleGeneExpressionStore[i-1] = Double.valueOf(eachGeneExpValues[i]);
-                        }
-                        else{
-                            singleGeneExpressionStore[i] = Double.valueOf(eachGeneExpValues[i]);
-                        }
-
-                    }
-
-                    geneIndexExpList.add(singleGeneExpressionStore);
-                }*/
-
 
             } catch ( Exception e ) {
 
@@ -129,11 +98,9 @@ public class KMeansMR {
 
 
             String geneLine = value.toString();
-            //System.out.println("mapper value =" + geneLine);
+
             String[] eachGeneExpValues = geneLine.split("\t");
             Double[] singleExpValue = new Double[geneLine.split("\t").length - 1];
-
-            //System.out.println("mapper single expression length = " + singleExpValue.length);
 
             for ( int i = 0; i < eachGeneExpValues.length; i++ ) {
 
@@ -146,7 +113,6 @@ public class KMeansMR {
 
             }
 
-            //Double[] singleExpValue = geneIndexExpList.get(0);
             int centroidIndex = 0;
             int c = 0;
             double closestCentroidDist = Double.MAX_VALUE;
@@ -161,21 +127,14 @@ public class KMeansMR {
                 double eucDistance = Math.sqrt(squaredSum);
                 if(eucDistance < closestCentroidDist){
                     closestCentroidDist = eucDistance;
-                    //System.out.println("euclid dist =" + closestCentroidDist);
                     centroidIndex = c;
                 }
                 c = c + 1;
-            }
+            };
 
-            Double[] closestCentroid = centroidList.get(centroidIndex);
+            int reduceKey = centroidIndex+1;
 
-            Text mapKeyOutput = new Text();
-            Text mapValueOutput = new Text();
-
-            mapKeyOutput.set(closestCentroid.toString());
-            mapValueOutput.set(singleExpValue.toString());
-
-            context.write(mapKeyOutput, value);
+            context.write(new IntWritable(reduceKey), value);
 
 
         }
@@ -183,10 +142,9 @@ public class KMeansMR {
     }
 
 
-    public static class KMeansReducer extends Reducer<Text, Text, Text, Text> {
+    public static class KMeansReducer extends Reducer<IntWritable, Text, Text, Text> {
 
         private ArrayList<Double[]> centroidList = new ArrayList<Double[]>();
-        private ArrayList<Double[]> geneIndexExpList = new ArrayList<Double[]>();
         private int centroidLength = 0;
 
 
@@ -198,12 +156,12 @@ public class KMeansMR {
                 super.setup(context);
                 Configuration conf = context.getConfiguration();
 
-                String filePath = "data/input/";
+                String filePath = "data/centroids/";
                 String fileName = "initialCentroids.txt";
                 Path centroidFilePath = Paths.get(filePath, fileName);
 
+
                 List<String> centroidData = Files.readAllLines(centroidFilePath, StandardCharsets.UTF_8);
-                //TODO: check whether you need to remove last row
 
                 for ( String singleGeneString : centroidData ) {
 
@@ -211,7 +169,7 @@ public class KMeansMR {
 
                         String[] centroidExpressions = singleGeneString.split("\t");
                         centroidLength = centroidExpressions.length;
-                        //System.out.println("length =" + centroidExpressions.length);
+
                         Double[] singleCentroidExpressionStore = new Double[singleGeneString.split("\t").length];
 
                         for ( int i = 0; i < centroidExpressions.length; i++ ) {
@@ -225,7 +183,6 @@ public class KMeansMR {
                     }
 
                 }
-                //Double[] newCentroidExp = new Double[centroidLength];
 
             } catch ( Exception e ) {
 
@@ -236,24 +193,13 @@ public class KMeansMR {
         }
 
 
-        protected void reduce(Text key, Iterable<Text> value, Context context) throws IOException, InterruptedException {
+        protected void reduce(IntWritable key, Iterable<Text> value, Context context) throws IOException, InterruptedException {
 
-            /*String[] tempLength = value.toString().split("\t");
-            String tempStr = value.toString();
-            System.out.println("value is "+value);
-            int tlen = tempLength.length;
-            System.out.println("len is "+tlen);*/
 
-            //int genesLength = (value.toString().split("\t").length) - 2;
-            //System.out.println(genesLength);
-            //String reduceKeyString = key.toString();
-            //System.out.println("key value string =" + reduceKeyString);
-            //Double[] newCentroidExp = new Double[reduceKeyString.split("\t").length];
             Double[] newCentroidExp = new Double[centroidLength];
             Arrays.fill(newCentroidExp, 0.00);
 
             int genesLength = centroidLength;
-            System.out.println(genesLength);
 
             int genesCount = 0;
             List<Integer> clusterGenePoints = new ArrayList<Integer>();
@@ -264,43 +210,46 @@ public class KMeansMR {
                 genesCount = genesCount + 1;
                 String singleGeneExpression = eachValue.toString();
                 String[] singleGeneExpSplit = singleGeneExpression.split("\t");
-                //System.out.println(Arrays.toString(singleGeneExpSplit));
 
-                //System.out.println("singleGeneExpSplit[0] = " + singleGeneExpSplit[0]);
                 clusterGenePoints.add(Integer.parseInt(singleGeneExpSplit[0]));
-                Double[] singleGeneDouble = new Double[singleGeneExpression.split("\t").length];
-
-                //System.out.println("singlgenelength =" + singleGeneExpSplit.length);
+                Double[] singleGeneDouble = new Double[singleGeneExpSplit.length];
 
                 for ( int i = 0; i < singleGeneExpSplit.length; i++) {
 
                     singleGeneDouble[i] = Double.valueOf(singleGeneExpSplit[i]);
-                    //System.out.println("data exps = " + singleGeneDouble[i]);
 
                     if(i>1){
-                        //System.out.println("newcentroid value = " + newCentroidExp[i-2]);
                         newCentroidExp[i-2] = newCentroidExp[i-2] + Double.valueOf(singleGeneExpSplit[i]);
                     }
 
 
                 }
-
             }
 
             for(int i = 0; i < genesLength; i ++){
 
                 newCentroidExp[i] = (double)newCentroidExp[i]/genesCount;
+                newCentroidExp[i] = BigDecimal.valueOf(newCentroidExp[i]) .setScale(2, RoundingMode.HALF_UP) .doubleValue();
             }
 
-            String filePath = "data/";
-            String fileName = "initialCentroids.txt";
+
+            String filePath = "data/centroids/";
+            String fileName = "Centroids.txt";
             Path centroidFilePath = Paths.get(filePath, fileName);
 
-            //Files.createFile(centroidFilePath);
             String strLine = Arrays.stream(newCentroidExp).map(Object::toString).collect(Collectors.joining("\t"));
-            Files.write(centroidFilePath, strLine.getBytes(), StandardOpenOption.CREATE_NEW);
+            if(Files.exists(centroidFilePath))
+            {
+                String nextLine="\n";
+                Files.write(centroidFilePath,nextLine.getBytes(),StandardOpenOption.APPEND);
+                Files.write(centroidFilePath, strLine.getBytes(), StandardOpenOption.APPEND);
+            }
+            else
+            {
+                Files.write(centroidFilePath, strLine.getBytes(), StandardOpenOption.CREATE);
+            }
 
-            context.write(new Text(Arrays.toString(newCentroidExp)), new Text(clusterGenePoints.stream().map(Object::toString).collect(Collectors.joining(","))));
+            context.write(new Text(key.toString()), new Text(clusterGenePoints.stream().map(Object::toString).collect(Collectors.joining(","))));
 
         }
 
