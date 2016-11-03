@@ -1,5 +1,6 @@
 package com.ub.cse601.project2.hadoop;
 
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 
 //import javax.security.auth.login.Configuration;
@@ -46,7 +47,7 @@ public class KMeansMR {
 
     }
 
-    private static class KMeansMapper extends Mapper<Text, Text, Text, Text> {
+    public static class KMeansMapper extends Mapper<LongWritable, Text, Text, Text> {
 
         private ArrayList<Double[]> centroidList = new ArrayList<Double[]>();
         private ArrayList<Double[]> geneIndexExpList = new ArrayList<Double[]>();
@@ -60,8 +61,8 @@ public class KMeansMR {
                 super.setup(context);
                 Configuration conf = context.getConfiguration();
 
-                String filePath = "data/";
-                String fileName = "initialCentroid.txt";
+                String filePath = "data/input/";
+                String fileName = "initialCentroids.txt";
                 Path centroidFilePath = Paths.get(filePath, fileName);
 
                 List<String> centroidData = Files.readAllLines(centroidFilePath, StandardCharsets.UTF_8);
@@ -121,7 +122,7 @@ public class KMeansMR {
         }
 
 
-        protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
+        protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
 
             String geneLine = value.toString();
@@ -148,8 +149,8 @@ public class KMeansMR {
             for (Double[] eachCentroid : centroidList){
 
                 double squaredSum = 0;
-                for (int i = 0; i<eachCentroid.length; i++) {
-                    squaredSum += Math.pow(singleExpValue[i+1] - eachCentroid[i], 2);
+                for (int i = 1; i<singleExpValue.length; i++) {
+                    squaredSum += Math.pow(singleExpValue[i] - eachCentroid[i-1], 2);
                 }
                 double eucDistance = Math.sqrt(squaredSum);
                 if(eucDistance < closestCentroidDist){
@@ -175,7 +176,7 @@ public class KMeansMR {
     }
 
 
-    private static class KMeansReducer extends Reducer<Text, Text, Text, Text> {
+    public static class KMeansReducer extends Reducer<Text, Text, Text, Text> {
 
         private ArrayList<Double[]> centroidList = new ArrayList<Double[]>();
         private ArrayList<Double[]> geneIndexExpList = new ArrayList<Double[]>();
@@ -189,8 +190,8 @@ public class KMeansMR {
                 super.setup(context);
                 Configuration conf = context.getConfiguration();
 
-                String filePath = "data/";
-                String fileName = "initialCentroid.txt";
+                String filePath = "data/input/";
+                String fileName = "initialCentroids.txt";
                 Path centroidFilePath = Paths.get(filePath, fileName);
 
                 List<String> centroidData = Files.readAllLines(centroidFilePath, StandardCharsets.UTF_8);
@@ -229,7 +230,7 @@ public class KMeansMR {
             int genesLength = value.toString().split("\t").length - 1;
             Double[] newCentroidExp = new Double[genesLength];
             int genesCount = 0;
-            List<Integer> clusterGenePoints = new ArrayList<>();
+            List<Double> clusterGenePoints = new ArrayList<>();
 
             for (Text eachValue: value) {
 
@@ -237,9 +238,10 @@ public class KMeansMR {
                 genesCount = genesCount + 1;
                 String singleGeneExpression = eachValue.toString();
                 String[] singleGeneExpSplit = singleGeneExpression.split("\t");
+                System.out.println(Arrays.toString(singleGeneExpSplit));
 
-                clusterGenePoints.add(Integer.parseInt(singleGeneExpSplit[0]));
-
+                System.out.println("singleGeneExpSplit[0] = " + singleGeneExpSplit[0]);
+                //clusterGenePoints.add((singleGeneExpSplit[0]);
                 Double[] singleGeneDouble = new Double[singleGeneExpression.split("\t").length];
 
 
@@ -263,7 +265,7 @@ public class KMeansMR {
             }
 
             String filePath = "data/";
-            String fileName = "initialCentroid.txt";
+            String fileName = "initialCentroids.txt";
             Path centroidFilePath = Paths.get(filePath, fileName);
 
             Files.createFile(centroidFilePath);
