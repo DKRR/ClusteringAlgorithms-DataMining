@@ -69,7 +69,7 @@ public class MRStarter {
     boolean checkConvergence(int iter){
         //file 1 = current centroid file;
         //prev file = centroid iter-1;
-        
+
     }
 
 
