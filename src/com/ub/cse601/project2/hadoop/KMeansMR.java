@@ -49,7 +49,10 @@ public class KMeansMR {
 
     public static class KMeansMapper extends Mapper<LongWritable, Text, IntWritable, Text> {
 
-        private ArrayList<Double[]> centroidList = new ArrayList<Double[]>();
+
+        private List<Double[]> centroidList = new ArrayList<Double[]>();
+        private List<Double[]> geneIndexExpList = new ArrayList<Double[]>();
+
 
 
         protected void setup(Context context) throws IOException, InterruptedException {
