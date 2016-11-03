@@ -30,19 +30,20 @@ public class RunHadoopMR {
         try {
 
             Scanner sc = new Scanner(System.in);
-            System.out.println("Enter File name of data set: ");
+            /*System.out.println("Enter File name of data set: ");
             String fileName = sc.next();
 
             if (fileName == null || fileName.length() == 0) {
 
                 fileName = "cho.txt";
 
-            }
+            }*/
 
             String path = "data/input/";
-            KMeansMR mapReduceObject = new KMeansMR(5, fileName, 100);
+            //KMeansMR mapReduceObject = new KMeansMR(5, fileName, 100);
+            KMeansMR mapReduceObject = new KMeansMR(5, "cho.txt", 100);
             mapReduceObject.readGeneDataSet(path);
-            //mapReduceObject.writeInitialCentroidsToFile(path, "initialCentroids.txt");
+            mapReduceObject.writeInitialCentroidsToFile(path, "initialCentroids.txt");
 
             Configuration conf = new Configuration();
             Job job = Job.getInstance(conf);
