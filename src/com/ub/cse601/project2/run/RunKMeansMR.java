@@ -4,6 +4,8 @@ package com.ub.cse601.project2.run;
  * Created by nitish on 11/2/16.
  */
 
+import com.ub.cse601.project2.hadoop.MRStarter;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -52,18 +54,32 @@ public class RunKMeansMR {
                 fileName = "cho.txt";
 
             }
+
             System.out.println("Enter No. of Clusters: ");
             int k = sc.nextInt();
+
             System.out.println("Enter Max Iterations: ");
             Integer maxIter = sc.nextInt();
-            String inPath = args[0] != null ? args[0] : "data/input/";
-            String outPath = args[1] != null ? args[1] : "data/output/";
+
+            //System.out.println("args" + args.length);
+
+            //String inPath = !args.equals("") && args[0] != null || args[0].length() > 0 ? args[0] : "data/input/";
+            //String outPath = !args.equals("") && args[1] != null || args[1].length() > 0 ? args[1] : "data/output/";
+
+            String inPath = "data/input/";
+            String outPath = "data/output/";
+
+
             RunKMeansMR kMeansMR = new RunKMeansMR(k, fileName, maxIter);
             kMeansMR.readGeneDataSet(inPath);
             double[][] initialKMeans = kMeansMR.initKMeans();
             kMeansMR.writeInitialCentroidsToFile(inPath, "Centroids_0.txt", initialKMeans);
+            MRStarter startJob = new MRStarter(inPath, outPath, maxIter);
+            startJob.runKMeansMR();
+
         } catch (Exception e) {
 
+            e.printStackTrace();
 
         }
 
@@ -100,6 +116,7 @@ public class RunKMeansMR {
 
         try {
 
+            System.out.println("I'm here");
             java.nio.file.Path filePath = Paths.get(path, fileName);
 
             List<String> geneData = Files.readAllLines(filePath, StandardCharsets.UTF_8);
@@ -200,4 +217,4 @@ public class RunKMeansMR {
 }
 
 
-}
+

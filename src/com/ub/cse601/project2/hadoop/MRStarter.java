@@ -8,6 +8,13 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 
 /**
  * Created by ramesh on 11/3/16.
@@ -67,8 +74,32 @@ public class MRStarter {
     }
 
     boolean checkConvergence(int iter){
-        //file 1 = current centroid file;
-        //prev file = centroid iter-1;
+
+        try {
+
+            String currentFileName = "Centroids_" + String.valueOf(iter);
+            String previousFileName = "Centroids_" + String.valueOf(iter - 1);
+
+            java.nio.file.Path currentCentroidFilePath = Paths.get(inPath, currentFileName);
+            java.nio.file.Path previousCentroidFilePath = Paths.get(inPath, previousFileName);
+
+            List<String> currentCentroids = Files.readAllLines(currentCentroidFilePath, StandardCharsets.UTF_8);
+            List<String> previousCentroids = Files.readAllLines(previousCentroidFilePath, StandardCharsets.UTF_8);
+
+            Collections.sort(currentCentroids);
+            Collections.sort(previousCentroids);
+
+            return currentCentroids.equals(previousCentroids);
+
+
+
+        } catch ( Exception e ) {
+
+            e.printStackTrace();
+
+        }
+
+        return false;
 
     }
 

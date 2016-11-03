@@ -2,6 +2,13 @@ package com.ub.cse601.project2.hadoop;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+import java.util.*;
+import org.apache.hadoop.conf.Configuration;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.util.stream.Collectors;
+
 
 public  class KMeansReducer extends Reducer<Text, Text, Text, Text> {
 
