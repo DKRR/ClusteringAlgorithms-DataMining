@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -74,8 +75,9 @@ public class MRStarter {
 
         }
 
-        System.out.println("Iterations: " + iterations);
-        System.out.println("Cluster Validation Jaccard Coefficient: " + calaculateJaccardCoefficient());
+        System.out.println("KMeansMR convereged after " +String.valueOf(iterations-1)+" iterations");
+        System.out.println("Performing Cluster validation....");
+        System.out.println("Jaccard Coefficient: " + calaculateJaccardCoefficient());
 
     }
 
