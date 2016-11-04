@@ -17,7 +17,7 @@ public class RunKMeans {
         if (fileName == null || fileName.length() == 0) fileName = "cho.txt";
         System.out.println("Enter No. of Clusters: ");
         int k = sc.nextInt();
-        String path = "data/input/";
+        String path = "data/";
         System.out.println("Enter Max Iterations: ");
         Integer maxIter = sc.nextInt();
         KMeans kMeans = new KMeans(k, fileName, maxIter);

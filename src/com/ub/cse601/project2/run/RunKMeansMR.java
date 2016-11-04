@@ -70,6 +70,7 @@ public class RunKMeansMR {
             String inPath = "data/input/";
             String outPath = "data/output/";
             String centroidPath = "data/centroids/";
+            String dataPath = "data/";
 
 
             Files.list(Paths.get(centroidPath)).forEach(x -> {
@@ -84,8 +85,20 @@ public class RunKMeansMR {
 
                 }
             });
+            Files.list(Paths.get(inPath)).forEach(x -> {
 
+                try {
 
+                    Files.delete(x);
+
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+
+                }
+            });
+
+            Files.copy(Paths.get(dataPath, fileName), Paths.get(inPath, fileName));
             RunKMeansMR kMeansMR = new RunKMeansMR(k, fileName, maxIter);
             double[][] returnedDataMatrix = kMeansMR.readGeneDataSet(inPath);
             double[][] initialKMeans = kMeansMR.initKMeans();
@@ -106,33 +119,6 @@ public class RunKMeansMR {
         }
 
     }
-
-    private boolean checkConvergence(double[][] oldKMeans, double[][] newKMeans) {
-        return Arrays.deepEquals(oldKMeans, newKMeans);
-    }
-
-    private double calaculateJaccardCoefficient() {
-        int countAgree = 0;
-        int countDisagree = 0;
-        for (int i = 0; i < dataMatrix.length - 1; i++) {
-            for (int j = i; j < dataMatrix.length; j++) {
-                if (dataMatrix[i][clusterIndex] == dataMatrix[j][clusterIndex] &&
-                        dataMatrix[i][clusterIndex - 1] == dataMatrix[j][clusterIndex - 1] &&
-                        dataMatrix[i][clusterIndex - 1] != -1) {
-                    countAgree++;
-                } else if (dataMatrix[i][clusterIndex] == dataMatrix[j][clusterIndex] &&
-                        dataMatrix[i][clusterIndex - 1] != dataMatrix[j][clusterIndex - 1] ||
-                        (dataMatrix[i][clusterIndex] != dataMatrix[j][clusterIndex] &&
-                                dataMatrix[i][clusterIndex - 1] == dataMatrix[j][clusterIndex - 1]) &&
-                                dataMatrix[i][clusterIndex - 1] != -1) {
-                    countDisagree++;
-                }
-
-            }
-        }
-        return (double) countAgree / (countAgree + countDisagree);
-    }
-
 
     public double[][] readGeneDataSet(String path) throws IOException {
 
