@@ -101,13 +101,17 @@ public class HierarchialClustering {
                 for (int j = i + 1; j < distanceMatrix.length; j++) {
                     if (distanceMatrix[i][j] < minDistance && dataMatrix[i][clusterIndex] != dataMatrix[j][clusterIndex]) {
                         minDistance = distanceMatrix[i][j];
+                        //get index of 2 min clusters
                         obj1Idx = i;
                         obj2Idx = j;
                     }
                 }
             }
+
+            //get actual cluster id for data points/clusters
             double grpi = dataMatrix[obj1Idx][clusterIndex];
             double grpj = dataMatrix[obj2Idx][clusterIndex];
+
             int[] grpiIndices = IntStream.range(0, dataMatrix.length)
                     .filter(i -> dataMatrix[i][clusterIndex] == grpi)
                     .toArray();
@@ -128,12 +132,35 @@ public class HierarchialClustering {
         }
         System.out.println("Hierarchial Clustering converged after " + String.valueOf(count - 1) + " iterations");
         printClusters();
+        System.out.println("Jaccard Coefficient: " + calaculateJaccardCoefficient());
     }
 
 
     public int calculateClusterCount(double[][] dataMatrix) {
         Map<Double, Long> clusterMap = Arrays.stream(dataMatrix).collect(Collectors.groupingBy(x -> x[clusterIndex], Collectors.counting()));
         return clusterMap.size();
+    }
+
+    private double calaculateJaccardCoefficient() {
+        int countAgree = 0;
+        int countDisagree = 0;
+        for (int i = 0; i < dataMatrix.length - 1; i++) {
+            for (int j = i; j < dataMatrix.length; j++) {
+                if (dataMatrix[i][clusterIndex] == dataMatrix[j][clusterIndex] &&
+                        dataMatrix[i][clusterIndex - 1] == dataMatrix[j][clusterIndex - 1] &&
+                        dataMatrix[i][clusterIndex - 1] != -1) {
+                    countAgree++;
+                } else if (dataMatrix[i][clusterIndex] == dataMatrix[j][clusterIndex] &&
+                        dataMatrix[i][clusterIndex - 1] != dataMatrix[j][clusterIndex - 1] ||
+                        (dataMatrix[i][clusterIndex] != dataMatrix[j][clusterIndex] &&
+                                dataMatrix[i][clusterIndex - 1] == dataMatrix[j][clusterIndex - 1]) &&
+                                dataMatrix[i][clusterIndex - 1] != -1) {
+                    countDisagree++;
+                }
+
+            }
+        }
+        return (double) countAgree / (countAgree + countDisagree);
     }
 
     public void printClusters() {

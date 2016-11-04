@@ -11,6 +11,7 @@ import java.util.Scanner;
 public class RunHierarchialClustering {
 
     public static void main(String[] args) throws Exception {
+
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter Final No. of Clusters: ");
         int k = sc.nextInt();
@@ -24,6 +25,8 @@ public class RunHierarchialClustering {
         hc.readGeneDataSet(path);
         double[][] distanceMatrix = hc.distanceMatrix();
         hc.runHierarchialMinClustering();
+
+
     }
 
 }
