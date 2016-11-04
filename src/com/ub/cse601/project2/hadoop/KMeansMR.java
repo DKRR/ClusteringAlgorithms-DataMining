@@ -54,7 +54,6 @@ public class KMeansMR {
         private List<Double[]> geneIndexExpList = new ArrayList<Double[]>();
 
 
-
         protected void setup(Context context) throws IOException, InterruptedException {
 
             try {
