@@ -1,5 +1,6 @@
 package com.ub.cse601.project2.hadoop;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -12,10 +13,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KMeansMapper extends Mapper<LongWritable, Text, Text, Text> {
+public class KMeansMapper extends Mapper<LongWritable, Text, IntWritable, Text> {
 
     private ArrayList<Double[]> centroidList = new ArrayList<Double[]>();
-    private ArrayList<Double[]> geneIndexExpList = new ArrayList<Double[]>();
     private static final String ITERATION = "ITERATION";
 
 
@@ -27,10 +27,11 @@ public class KMeansMapper extends Mapper<LongWritable, Text, Text, Text> {
             super.setup(context);
             Configuration conf = context.getConfiguration();
             Integer iter = conf.getInt(ITERATION, 0)-1;
-            String filePath = "data/input/";
-            String fileName = "Centroids_"+iter;
+            String filePath = "data/centroids/";
+            String fileName = "centroids_" + iter + ".txt";
             Path centroidFilePath = Paths.get(filePath, fileName);
             List<String> centroidData = Files.readAllLines(centroidFilePath, StandardCharsets.UTF_8);
+
             for ( String singleGeneString : centroidData ) {
 
                 if ( singleGeneString != null || singleGeneString != "" ) {
@@ -53,30 +54,6 @@ public class KMeansMapper extends Mapper<LongWritable, Text, Text, Text> {
 
             System.out.println("centorid list = " + centroidList.toString());
 
-                /*String dataFilePath = "data/";
-                String dataFileName = "cho.txt";
-                Path genePath = Paths.get(dataFilePath, dataFileName);
-
-                List<String> geneIndexExpData = Files.readAllLines(genePath, StandardCharsets.UTF_8);
-
-                for(String eachGeneString : geneIndexExpData){
-
-                    String[] eachGeneExpValues = eachGeneString.split("\t");
-                    Double[] singleGeneExpressionStore = new Double[eachGeneString.split("\t").length];
-
-                    for ( int i = 0; i < eachGeneExpValues.length; i++ ) {
-
-                        if(i>1) {
-                            singleGeneExpressionStore[i-1] = Double.valueOf(eachGeneExpValues[i]);
-                        }
-                        else{
-                            singleGeneExpressionStore[i] = Double.valueOf(eachGeneExpValues[i]);
-                        }
-
-                    }
-
-                    geneIndexExpList.add(singleGeneExpressionStore);
-                }*/
 
 
         } catch ( Exception e ) {
@@ -92,11 +69,9 @@ public class KMeansMapper extends Mapper<LongWritable, Text, Text, Text> {
 
 
         String geneLine = value.toString();
-        //System.out.println("mapper value =" + geneLine);
+
         String[] eachGeneExpValues = geneLine.split("\t");
         Double[] singleExpValue = new Double[geneLine.split("\t").length - 1];
-
-        //System.out.println("mapper single expression length = " + singleExpValue.length);
 
         for ( int i = 0; i < eachGeneExpValues.length; i++ ) {
 
@@ -109,7 +84,6 @@ public class KMeansMapper extends Mapper<LongWritable, Text, Text, Text> {
 
         }
 
-        //Double[] singleExpValue = geneIndexExpList.get(0);
         int centroidIndex = 0;
         int c = 0;
         double closestCentroidDist = Double.MAX_VALUE;
@@ -124,21 +98,14 @@ public class KMeansMapper extends Mapper<LongWritable, Text, Text, Text> {
             double eucDistance = Math.sqrt(squaredSum);
             if(eucDistance < closestCentroidDist){
                 closestCentroidDist = eucDistance;
-                //System.out.println("euclid dist =" + closestCentroidDist);
                 centroidIndex = c;
             }
             c = c + 1;
         }
 
-        Double[] closestCentroid = centroidList.get(centroidIndex);
+        int reduceKey = centroidIndex+1;
 
-        Text mapKeyOutput = new Text();
-        Text mapValueOutput = new Text();
-
-        mapKeyOutput.set(closestCentroid.toString());
-        mapValueOutput.set(singleExpValue.toString());
-
-        context.write(mapKeyOutput, value);
+        context.write(new IntWritable(reduceKey), value);
 
 
     }
