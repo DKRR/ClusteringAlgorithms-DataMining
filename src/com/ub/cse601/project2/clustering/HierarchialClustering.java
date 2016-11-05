@@ -85,7 +85,7 @@ HierarchialClustering {
                 distanceMatrix[i][j] = eucDistance;
                 distanceMatrix[j][i] = eucDistance;
             }
-            distanceMatrix[i][colCount - 1] = i + 1;
+            //distanceMatrix[i][colCount - 2] = i + 1;
         }
         this.distanceMatrix = distanceMatrix;
         return distanceMatrix;
