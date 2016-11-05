@@ -116,7 +116,7 @@ public class DBScan {
         int count = 0;
         List<Integer> episilonIndex = new ArrayList<Integer>();
         for (int j = 0; j < distanceMatrix.length; j++) {
-            if (distanceMatrix[index][j] <= epsilon && distanceMatrix[index][clusterIndex] != Double.NEGATIVE_INFINITY) {
+            if (distanceMatrix[index][j] <= epsilon && dataMatrix[index][clusterIndex] != Double.NEGATIVE_INFINITY) {
                 episilonIndex.add(j);
             }
         }
