@@ -18,10 +18,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -36,7 +34,7 @@ public class KMeansMRStarter {
     private double[][] dataMatrix;
     private int clusterIndex;
 
-    public KMeansMRStarter(String inPath, String outPath, Integer maxIterations, double[][] dataMatrix, int clusterIndex ) {
+    public KMeansMRStarter(String inPath, String outPath, Integer maxIterations, double[][] dataMatrix, int clusterIndex) {
 
         this.inPath = inPath;
         this.outPath = outPath;
@@ -56,7 +54,7 @@ public class KMeansMRStarter {
             Job job = Job.getInstance(conf);
             //delete output folder
             deleteOutPutFolder(outPath, conf);
-            job.setJobName("Running KMeans MR, iteration: "+iterations);
+            job.setJobName("Running KMeans MR, iteration: " + iterations);
             job.getConfiguration().setInt(ITERATION, iterations);
             job.setMapperClass(KMeansMapper.class);
             job.setReducerClass(KMeansReducer.class);
@@ -78,7 +76,8 @@ public class KMeansMRStarter {
 
         }
 
-        System.out.println("KMeansMR convereged after " +String.valueOf(iterations-1)+" iterations");
+        System.out.println("KMeansMR convereged after " + String.valueOf(iterations - 1) + " iterations");
+        printClusters();
         System.out.println("Performing Cluster validation....");
         System.out.println("Jaccard Coefficient: " + calaculateJaccardCoefficient());
         System.out.println("Performing PCA analysis and generating Scatter Plot...");
@@ -97,7 +96,7 @@ public class KMeansMRStarter {
 
     }
 
-    boolean checkConvergence(int iter){
+    boolean checkConvergence(int iter) {
 
         try {
 
@@ -118,8 +117,7 @@ public class KMeansMRStarter {
             return currentCentroids.equals(previousCentroids);
 
 
-
-        } catch ( Exception e ) {
+        } catch (Exception e) {
 
             e.printStackTrace();
 
@@ -137,19 +135,18 @@ public class KMeansMRStarter {
 
         List<String> finalData = Files.readAllLines(centroidFilePath, StandardCharsets.UTF_8);
 
-        for ( String singleLine : finalData ) {
+        for (String singleLine : finalData) {
 
             String[] lineSplit = singleLine.split("\t");
             Double centroidIndex = Double.parseDouble(lineSplit[0]);
 
             Arrays.stream(lineSplit[1].split(",")).forEach(x -> {
 
-                    int index = Integer.parseInt(x);
-                    dataMatrix[index-1][clusterIndex] = centroidIndex;
+                int index = Integer.parseInt(x);
+                dataMatrix[index - 1][clusterIndex] = centroidIndex;
             });
 
         }
-
         int countAgree = 0;
         int countDisagree = 0;
 
@@ -173,23 +170,30 @@ public class KMeansMRStarter {
     }
 
 
-    private void createScatterPlot(String title){
+    private void createScatterPlot(String title) {
 
         PCAAnalysis pca = new PCAAnalysis();
-        RealMatrix featureMatrix = pca.prepareFeatureMatrix(dataMatrix, clusterIndex, clusterIndex-2);
+        RealMatrix featureMatrix = pca.prepareFeatureMatrix(dataMatrix, clusterIndex, clusterIndex - 2);
         RealMatrix covMatrix = pca.covarianceMatrix(featureMatrix);
-        RealMatrix principalComponents = pca.performEigenDecomposition(covMatrix,featureMatrix);
+        RealMatrix principalComponents = pca.performEigenDecomposition(covMatrix, featureMatrix);
         double[] scaleX = pca.findXScale(principalComponents);
         double[] scaleY = pca.findYScale(principalComponents);
-        for(int i=0; i<principalComponents.getRowDimension(); i++){
-            dataMatrix[i][1] = principalComponents.getEntry(i,0);
-            dataMatrix[i][2] = principalComponents.getEntry(i,1);
+        for (int i = 0; i < principalComponents.getRowDimension(); i++) {
+            dataMatrix[i][1] = principalComponents.getEntry(i, 0);
+            dataMatrix[i][2] = principalComponents.getEntry(i, 1);
         }
         PCAScatterPlot.launchClass(dataMatrix, title, scaleX, scaleY, clusterIndex);
 
     }
 
-
+    public void printClusters() {
+        Map<Double, List<double[]>> clusterMap = new TreeMap<Double, List<double[]>>(Arrays.stream(dataMatrix).filter(x -> x[clusterIndex] != Double.NEGATIVE_INFINITY).
+                collect(Collectors.groupingBy(x -> x[clusterIndex], Collectors.mapping(x -> x, Collectors.toList()))));
+        clusterMap.forEach((x, y) -> {
+            System.out.println("Cluster " + Double.valueOf(x).intValue() + " size: " + y.size());
+        });
+        System.out.println("Total clusters formed: "+clusterMap.size());
+    }
 
 
 }

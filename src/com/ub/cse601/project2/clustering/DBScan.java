@@ -142,10 +142,12 @@ public class DBScan {
     }
 
     public void printClusters() {
-        Map<Double, List<double[]>> clusterMap = Arrays.stream(dataMatrix).filter(x -> x[clusterIndex] != Double.NEGATIVE_INFINITY).collect(Collectors.groupingBy(x -> x[clusterIndex], Collectors.mapping(x -> x, Collectors.toList())));
+        Map<Double, List<double[]>> clusterMap = new TreeMap<Double, List<double[]>>(Arrays.stream(dataMatrix).filter(x -> x[clusterIndex] != Double.NEGATIVE_INFINITY).
+                collect(Collectors.groupingBy(x -> x[clusterIndex], Collectors.mapping(x -> x, Collectors.toList()))));
         clusterMap.forEach((x, y) -> {
             System.out.println("Cluster " + Double.valueOf(x).intValue() + " size: " + y.size());
         });
+        System.out.println("Total clusters formed: "+clusterMap.size());
     }
 
     private double calaculateJaccardCoefficient() {

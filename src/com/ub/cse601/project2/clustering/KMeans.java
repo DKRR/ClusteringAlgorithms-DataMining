@@ -181,6 +181,7 @@ public class KMeans {
             Arrays.stream(dataMatrix).filter(x -> x[clusterIndex] == clsIndx).collect(Collectors.toList());
             System.out.println("Cluster " + new Double(clsIndx).intValue() + " size: " + clusterObjects.size());
         }
+        System.out.println("Total clusters formed: "+kMeans.length);
     }
 
     private double calaculateJaccardCoefficient() {

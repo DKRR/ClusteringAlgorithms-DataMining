@@ -8,6 +8,7 @@ import java.nio.file.attribute.FileAttributeView;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -165,10 +166,12 @@ HierarchialClustering {
     }
 
     public void printClusters() {
-        Map<Double, List<double[]>> clusterMap = Arrays.stream(dataMatrix).collect(Collectors.groupingBy(x -> x[clusterIndex], Collectors.mapping(x -> x, Collectors.toList())));
+        Map<Double, List<double[]>> clusterMap = new TreeMap<Double, List<double[]>>(Arrays.stream(dataMatrix).
+                collect(Collectors.groupingBy(x -> x[clusterIndex], Collectors.mapping(x -> x, Collectors.toList()))));
         clusterMap.forEach((x, y) -> {
             System.out.println("Cluster " + Double.valueOf(x).intValue() + " size: " + y.size());
         });
+        System.out.println("Total clusters formed: " + clusterMap.size());
     }
 }
 
