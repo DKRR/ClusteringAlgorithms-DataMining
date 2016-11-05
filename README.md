@@ -21,4 +21,6 @@ Part-2: Running KMeans Map Reduce
 2. create two new folders input and centroids inside data folder created in above step.
 3. Give the following commands to run KMeans MR
    java -cp project2.jar com.ub.cse601.project2.run.RunKMeansMR
-
+4. Once MR Jobs are successful, Centroids folder contains inital centroid file used for MR(centroids_0.txt) as well as all intermediate centroid files
+   used in each iteration of MR job(centroid_1.txt, centroid_2.txt, ....). The last centroid file generated is the final converged centroid file.
+5. Finally, output folder contains final output generated from MR jobs, which contains final centroids and their respective cluster data points assigned to.
