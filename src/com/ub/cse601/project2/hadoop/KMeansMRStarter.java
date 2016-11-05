@@ -1,6 +1,9 @@
 package com.ub.cse601.project2.hadoop;
 
+import com.ub.cse601.project2.clustering.PCAAnalysis;
+import com.ub.cse601.project2.clustering.PCAScatterPlot;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -24,7 +27,7 @@ import java.util.List;
 /**
  * Created by ramesh on 11/3/16.
  */
-public class MRStarter {
+public class KMeansMRStarter {
 
     private String inPath;
     private String outPath;
@@ -33,7 +36,7 @@ public class MRStarter {
     private double[][] dataMatrix;
     private int clusterIndex;
 
-    public MRStarter(String inPath, String outPath, Integer maxIterations, double[][] dataMatrix, int clusterIndex ) {
+    public KMeansMRStarter(String inPath, String outPath, Integer maxIterations, double[][] dataMatrix, int clusterIndex ) {
 
         this.inPath = inPath;
         this.outPath = outPath;
@@ -57,7 +60,7 @@ public class MRStarter {
             job.getConfiguration().setInt(ITERATION, iterations);
             job.setMapperClass(KMeansMapper.class);
             job.setReducerClass(KMeansReducer.class);
-            job.setJarByClass(MRStarter.class);
+            job.setJarByClass(KMeansMRStarter.class);
             Path in = new Path(inPath);
             Path out = new Path(outPath);
             job.setMapOutputKeyClass(IntWritable.class);
@@ -78,6 +81,9 @@ public class MRStarter {
         System.out.println("KMeansMR convereged after " +String.valueOf(iterations-1)+" iterations");
         System.out.println("Performing Cluster validation....");
         System.out.println("Jaccard Coefficient: " + calaculateJaccardCoefficient());
+        System.out.println("Performing PCA analysis and generating Scatter Plot...");
+        createScatterPlot("KMeans Map Reduce");
+
 
     }
 
@@ -165,6 +171,25 @@ public class MRStarter {
         }
         return (double) countAgree / (countAgree + countDisagree);
     }
+
+
+    private void createScatterPlot(String title){
+
+        PCAAnalysis pca = new PCAAnalysis();
+        RealMatrix featureMatrix = pca.prepareFeatureMatrix(dataMatrix, clusterIndex, clusterIndex-2);
+        RealMatrix covMatrix = pca.covarianceMatrix(featureMatrix);
+        RealMatrix principalComponents = pca.performEigenDecomposition(covMatrix,featureMatrix);
+        double[] scaleX = pca.findXScale(principalComponents);
+        double[] scaleY = pca.findYScale(principalComponents);
+        for(int i=0; i<principalComponents.getRowDimension(); i++){
+            dataMatrix[i][1] = principalComponents.getEntry(i,0);
+            dataMatrix[i][2] = principalComponents.getEntry(i,1);
+        }
+        PCAScatterPlot.launchClass(dataMatrix, title, scaleX, scaleY, clusterIndex);
+
+    }
+
+
 
 
 }

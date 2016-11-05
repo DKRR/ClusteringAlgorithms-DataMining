@@ -1,5 +1,7 @@
 package com.ub.cse601.project2.clustering;
 
+import org.apache.commons.math3.linear.RealMatrix;
+
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -100,7 +102,10 @@ public class DBScan {
                 }
             }
         }
+        printClusters();
         System.out.println("Runnning Cluster Validation for DBScan, Jaccard Coeffcient: " + calaculateJaccardCoefficient());
+        System.out.println("Running PCA Analysis and generating scatter plot...");
+        createScatterPlot("DBScan");
         return dataMatrix;
     }
 
@@ -164,6 +169,23 @@ public class DBScan {
 
         return (double) countAgree / (countAgree + countDisagree);
     }
+
+    private void createScatterPlot(String title){
+
+        PCAAnalysis pca = new PCAAnalysis();
+        RealMatrix featureMatrix = pca.prepareFeatureMatrix(dataMatrix, clusterIndex, clusterIndex-2);
+        RealMatrix covMatrix = pca.covarianceMatrix(featureMatrix);
+        RealMatrix principalComponents = pca.performEigenDecomposition(covMatrix,featureMatrix);
+        double[] scaleX = pca.findXScale(principalComponents);
+        double[] scaleY = pca.findYScale(principalComponents);
+        for(int i=0; i<principalComponents.getRowDimension(); i++){
+            dataMatrix[i][1] = principalComponents.getEntry(i,0);
+            dataMatrix[i][2] = principalComponents.getEntry(i,1);
+        }
+        PCAScatterPlot.launchClass(dataMatrix, title, scaleX, scaleY, clusterIndex);
+
+    }
+
 
 
 }

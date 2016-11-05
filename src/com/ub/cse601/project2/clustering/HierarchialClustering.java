@@ -17,7 +17,8 @@ import static java.util.Arrays.stream;
 /**
  * Created by VenkataRamesh on 10/29/2016.
  */
-public class HierarchialClustering {
+public class
+HierarchialClustering {
 
     private String fileName;
     private double[][] dataMatrix;

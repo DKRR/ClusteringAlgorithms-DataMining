@@ -42,11 +42,11 @@ public class RunDBScan {
         DBScan dbScan = new DBScan(fileName, minPoints, episilon);
         dbScan.readGeneDataSet(path);
         double[][] distMat = dbScan.calculateDistanceMatrix();
-        Arrays.stream(distMat).forEach(x->{
+        /*Arrays.stream(distMat).forEach(x->{
             System.out.println(Arrays.toString(x));
-        });
+        });*/
         dbScan.runDBScan();
-        dbScan.printClusters();
+        //dbScan.printClusters();
 
     }
 }

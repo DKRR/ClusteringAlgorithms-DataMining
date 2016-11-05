@@ -1,5 +1,8 @@
 package com.ub.cse601.project2.clustering;
 
+import javafx.application.Application;
+import org.apache.commons.math3.linear.RealMatrix;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -20,17 +23,19 @@ public class KMeans {
     private Integer maxIterations;
     private Integer initialCentroids;
     private String fileName;
-    private double[][] dataMatrix;
+    public double[][] dataMatrix;
     private Map<Integer, List<double[][]>> clusters;
     private int objectCount;
     private int attributeCount;
     private int clusterIndex;
+    private List<Integer> geneIds;
 
 
-    public KMeans(Integer initialCentroids, String fileName, Integer maxIterations) {
+    public KMeans(Integer initialCentroids, String fileName, Integer maxIterations, List<Integer> geneIds) {
         this.initialCentroids = initialCentroids;
         this.fileName = fileName;
         this.maxIterations = maxIterations;
+        this.geneIds = geneIds;
     }
 
 
@@ -60,7 +65,6 @@ public class KMeans {
             }
 
 
-
         } catch (Exception ex) {
 
         }
@@ -87,20 +91,32 @@ public class KMeans {
     }
 
     public double[][] initKMeans() {
-        double[][] kMeans = new double[initialCentroids][];
-        int k = 0;
-        Random rand = new Random();
-        List<Integer> clusterIndices = new ArrayList<Integer>();
-        while (k < initialCentroids) {
-            int centroidIndex = rand.nextInt(dataMatrix.length);
-            if (clusterIndices.contains(centroidIndex)) continue;
-            else {
-                clusterIndices.add(centroidIndex);
-                kMeans[k] = Arrays.copyOfRange(dataMatrix[centroidIndex], 1, attributeCount + 1);
-                Arrays.stream(kMeans[k]).forEach(x -> {
+
+        double[][] kMeans = null;
+        if (geneIds.size() > 0) {
+            kMeans = new double[geneIds.size()][];
+            for (int i = 0; i < geneIds.size(); i++) {
+                kMeans[i] = Arrays.copyOfRange(dataMatrix[geneIds.get(i) - 1], 1, attributeCount + 1);
+                Arrays.stream(kMeans[i]).forEach(x -> {
                     x = new BigDecimal(x).setScale(2, RoundingMode.HALF_UP).doubleValue();
                 });
-                k++;
+            }
+        } else {
+            kMeans = new double[initialCentroids][];
+            int k = 0;
+            Random rand = new Random();
+            List<Integer> clusterIndices = new ArrayList<Integer>();
+            while (k < initialCentroids) {
+                int centroidIndex = rand.nextInt(dataMatrix.length);
+                if (clusterIndices.contains(centroidIndex)) continue;
+                else {
+                    clusterIndices.add(centroidIndex);
+                    kMeans[k] = Arrays.copyOfRange(dataMatrix[centroidIndex], 1, attributeCount + 1);
+                    Arrays.stream(kMeans[k]).forEach(x -> {
+                        x = new BigDecimal(x).setScale(2, RoundingMode.HALF_UP).doubleValue();
+                    });
+                    k++;
+                }
             }
         }
         return kMeans;
@@ -150,6 +166,8 @@ public class KMeans {
         printClusters(kMeans);
         System.out.println("Performing Cluster validation...");
         System.out.println("Jaccard Coefficient: " + calaculateJaccardCoefficient());
+        System.out.println("Running PCA analysis...");
+        createScatterPlot("KMeans");
     }
 
     private boolean checkConvergence(double[][] oldKMeans, double[][] newKMeans) {
@@ -185,6 +203,23 @@ public class KMeans {
             }
         }
         return (double) countAgree / (countAgree + countDisagree);
+    }
+
+
+    private void createScatterPlot(String title) {
+
+        PCAAnalysis pca = new PCAAnalysis();
+        RealMatrix featureMatrix = pca.prepareFeatureMatrix(dataMatrix, clusterIndex, clusterIndex - 2);
+        RealMatrix covMatrix = pca.covarianceMatrix(featureMatrix);
+        RealMatrix principalComponents = pca.performEigenDecomposition(covMatrix, featureMatrix);
+        double[] scaleX = pca.findXScale(principalComponents);
+        double[] scaleY = pca.findYScale(principalComponents);
+        for (int i = 0; i < principalComponents.getRowDimension(); i++) {
+            dataMatrix[i][1] = principalComponents.getEntry(i, 0);
+            dataMatrix[i][2] = principalComponents.getEntry(i, 1);
+        }
+        PCAScatterPlot.launchClass(dataMatrix, title, scaleX, scaleY, clusterIndex);
+
     }
 
 
