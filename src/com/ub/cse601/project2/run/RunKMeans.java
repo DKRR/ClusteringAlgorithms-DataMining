@@ -42,7 +42,13 @@ public class RunKMeans {
         }
         System.out.println("Enter Max Iterations: ");
         Integer maxIter = sc.nextInt();
-        KMeans kMeans = new KMeans(k, fileName, maxIter, geneIds);
+        boolean normalizePCA = false;
+        System.out.println("Do you want to normalize dat for PCA, Please type 'Y' or 'N': ");
+        String normalize = sc.next();
+        if(normalize.equalsIgnoreCase("y")){
+            normalizePCA = true;
+        }
+        KMeans kMeans = new KMeans(k, fileName, maxIter, geneIds, normalizePCA);
         kMeans.readGeneDataSet(path);
         double[][] distanceMatrix = kMeans.calculateDistanceMatrix();
         double[][] initKMeans = kMeans.initKMeans();

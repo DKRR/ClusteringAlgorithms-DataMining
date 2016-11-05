@@ -39,7 +39,13 @@ public class RunDBScan {
         }
         if (fileName == null || fileName.length() == 0) fileName = "cho.txt";
         String path = "data/";
-        DBScan dbScan = new DBScan(fileName, minPoints, episilon);
+        boolean normalizePCA = false;
+        System.out.println("Do you want to normalize dat for PCA, Please type 'Y' or 'N': ");
+        String normalize = sc.next();
+        if(normalize.equalsIgnoreCase("y")){
+            normalizePCA = true;
+        }
+        DBScan dbScan = new DBScan(fileName, minPoints, episilon, normalizePCA);
         dbScan.readGeneDataSet(path);
         double[][] distMat = dbScan.calculateDistanceMatrix();
         /*Arrays.stream(distMat).forEach(x->{

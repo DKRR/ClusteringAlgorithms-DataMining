@@ -87,7 +87,7 @@ public class KMeansReducer extends Reducer<IntWritable, Text, Text, Text> {
 
         for (int i = 0; i < genesLength; i++) {
 
-            newCentroidExp[i] = (double) newCentroidExp[i] / genesCount;
+            newCentroidExp[i] = newCentroidExp[i] / genesCount;
             newCentroidExp[i] = BigDecimal.valueOf(newCentroidExp[i]).setScale(2, RoundingMode.HALF_UP).doubleValue();
         }
 

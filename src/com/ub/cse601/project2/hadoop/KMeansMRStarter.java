@@ -33,14 +33,16 @@ public class KMeansMRStarter {
     private static final String ITERATION = "ITERATION";
     private double[][] dataMatrix;
     private int clusterIndex;
+    private boolean normalizePCA;
 
-    public KMeansMRStarter(String inPath, String outPath, Integer maxIterations, double[][] dataMatrix, int clusterIndex) {
+    public KMeansMRStarter(String inPath, String outPath, Integer maxIterations, double[][] dataMatrix, int clusterIndex, boolean normalizePCA) {
 
         this.inPath = inPath;
         this.outPath = outPath;
         this.maxIterations = maxIterations;
         this.dataMatrix = dataMatrix;
         this.clusterIndex = clusterIndex;
+        this.normalizePCA = normalizePCA;
 
     }
 
@@ -174,7 +176,7 @@ public class KMeansMRStarter {
     private void createScatterPlot(String title) {
 
         PCAAnalysis pca = new PCAAnalysis();
-        RealMatrix featureMatrix = pca.prepareFeatureMatrix(dataMatrix, clusterIndex, clusterIndex - 2);
+        RealMatrix featureMatrix = pca.prepareFeatureMatrix(dataMatrix, clusterIndex, clusterIndex - 2, normalizePCA);
         RealMatrix covMatrix = pca.covarianceMatrix(featureMatrix);
         RealMatrix principalComponents = pca.performEigenDecomposition(covMatrix, featureMatrix);
         double[] scaleX = pca.findXScale(principalComponents);
@@ -193,7 +195,7 @@ public class KMeansMRStarter {
         clusterMap.forEach((x, y) -> {
             System.out.println("Cluster " + Double.valueOf(x).intValue() + " size: " + y.size());
         });
-        System.out.println("Total clusters formed: "+clusterMap.size());
+        System.out.println("Total clusters formed: " + clusterMap.size());
     }
 
 

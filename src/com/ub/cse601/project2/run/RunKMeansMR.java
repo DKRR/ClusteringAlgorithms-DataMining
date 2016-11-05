@@ -34,13 +34,15 @@ public class RunKMeansMR {
     private String inPath;
     private String outPath;
     private List<Integer> geneIds;
+    private boolean normalizePCA;
 
 
-    public RunKMeansMR(Integer initialCentroids, String fileName, Integer maxIterations, List<Integer> geneIds) {
+    public RunKMeansMR(Integer initialCentroids, String fileName, Integer maxIterations, List<Integer> geneIds, boolean normalizePCA) {
         this.initialCentroids = initialCentroids;
         this.fileName = fileName;
         this.maxIterations = maxIterations;
         this.geneIds = geneIds;
+        this.normalizePCA = normalizePCA;
     }
 
 
@@ -69,6 +71,12 @@ public class RunKMeansMR {
             }
             System.out.println("Enter Max Iterations: ");
             Integer maxIter = sc.nextInt();
+            boolean normalizePCA = false;
+            System.out.println("Do you want to normalize dat for PCA, Please type 'Y' or 'N': ");
+            String normalize = sc.next();
+            if (normalize.equalsIgnoreCase("y")) {
+                normalizePCA = true;
+            }
             //System.out.println("args" + args.length);
 
             //String inPath = !args.equals("") && args[0] != null || args[0].length() > 0 ? args[0] : "data/input/";
@@ -106,7 +114,7 @@ public class RunKMeansMR {
             });
 
             Files.copy(Paths.get(dataPath, fileName), Paths.get(inPath, fileName));
-            RunKMeansMR kMeansMR = new RunKMeansMR(k, fileName, maxIter, geneIds);
+            RunKMeansMR kMeansMR = new RunKMeansMR(k, fileName, maxIter, geneIds, normalizePCA);
             double[][] returnedDataMatrix = kMeansMR.readGeneDataSet(inPath);
             double[][] initialKMeans = kMeansMR.initKMeans();
             if (manual.equalsIgnoreCase("Y")) {
@@ -124,7 +132,7 @@ public class RunKMeansMR {
             tk[3] = new double[]{-0.48, 0.06, -0.01, 0.31, 0.37, 0.27, 0.35, 0.31, -0.19, -0.27, -0.23, 0.15, 0.024, 0.18, -0.24, -0.41};
             tk[4] = new double[]{-0.79, -0.56, -0.79, -0.23, -0.53, -0.14, 0.61, 0.95, 0.96, 0.38, -0.11, -0.31, -0.41, 0.49, 0.08, 0.15};*/
             kMeansMR.writeInitialCentroidsToFile(centroidPath, "centroids_0.txt", initialKMeans);
-            KMeansMRStarter startJob = new KMeansMRStarter(inPath, outPath, maxIter, returnedDataMatrix, kMeansMR.clusterIndex);
+            KMeansMRStarter startJob = new KMeansMRStarter(inPath, outPath, maxIter, returnedDataMatrix, kMeansMR.clusterIndex, normalizePCA);
             startJob.runKMeansMR();
 
         } catch (Exception e) {

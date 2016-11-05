@@ -24,6 +24,7 @@ public class DBScan {
     private int minPoints;
     private double epsilon;
     private int visited;
+    private boolean normalizePCA;
 
 
     public DBScan(String fileName) {
@@ -31,10 +32,12 @@ public class DBScan {
 
     }
 
-    public DBScan(String fileName, Integer minPoints, double epsilon) {
+    public DBScan(String fileName, Integer minPoints, double epsilon, boolean normalizePCA) {
+
         this.minPoints = minPoints;
         this.fileName = fileName;
         this.epsilon = epsilon;
+        this.normalizePCA = normalizePCA;
 
     }
 
@@ -147,7 +150,7 @@ public class DBScan {
         clusterMap.forEach((x, y) -> {
             System.out.println("Cluster " + Double.valueOf(x).intValue() + " size: " + y.size());
         });
-        System.out.println("Total clusters formed: "+clusterMap.size());
+        System.out.println("Total clusters formed: " + clusterMap.size());
     }
 
     private double calaculateJaccardCoefficient() {
@@ -172,22 +175,21 @@ public class DBScan {
         return (double) countAgree / (countAgree + countDisagree);
     }
 
-    private void createScatterPlot(String title){
+    private void createScatterPlot(String title) {
 
         PCAAnalysis pca = new PCAAnalysis();
-        RealMatrix featureMatrix = pca.prepareFeatureMatrix(dataMatrix, clusterIndex, clusterIndex-2);
+        RealMatrix featureMatrix = pca.prepareFeatureMatrix(dataMatrix, clusterIndex, clusterIndex - 2, normalizePCA);
         RealMatrix covMatrix = pca.covarianceMatrix(featureMatrix);
-        RealMatrix principalComponents = pca.performEigenDecomposition(covMatrix,featureMatrix);
+        RealMatrix principalComponents = pca.performEigenDecomposition(covMatrix, featureMatrix);
         double[] scaleX = pca.findXScale(principalComponents);
         double[] scaleY = pca.findYScale(principalComponents);
-        for(int i=0; i<principalComponents.getRowDimension(); i++){
-            dataMatrix[i][1] = principalComponents.getEntry(i,0);
-            dataMatrix[i][2] = principalComponents.getEntry(i,1);
+        for (int i = 0; i < principalComponents.getRowDimension(); i++) {
+            dataMatrix[i][1] = principalComponents.getEntry(i, 0);
+            dataMatrix[i][2] = principalComponents.getEntry(i, 1);
         }
         PCAScatterPlot.launchClass(dataMatrix, title, scaleX, scaleY, clusterIndex);
 
     }
-
 
 
 }

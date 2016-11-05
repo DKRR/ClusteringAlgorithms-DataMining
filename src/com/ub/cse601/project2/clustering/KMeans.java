@@ -29,13 +29,15 @@ public class KMeans {
     private int attributeCount;
     private int clusterIndex;
     private List<Integer> geneIds;
+    private boolean normalizePCA;
 
 
-    public KMeans(Integer initialCentroids, String fileName, Integer maxIterations, List<Integer> geneIds) {
+    public KMeans(Integer initialCentroids, String fileName, Integer maxIterations, List<Integer> geneIds, boolean normalizePCA) {
         this.initialCentroids = initialCentroids;
         this.fileName = fileName;
         this.maxIterations = maxIterations;
         this.geneIds = geneIds;
+        this.normalizePCA = normalizePCA;
     }
 
 
@@ -43,7 +45,7 @@ public class KMeans {
         this.fileName = fileName;
     }
 
-    public double[][] readGeneDataSet(String path) throws IOException, FileNotFoundException {
+    public double[][] readGeneDataSet(String path) throws IOException {
         Path filePath = null;
         try {
             filePath = Paths.get(path, fileName);
@@ -210,7 +212,7 @@ public class KMeans {
     private void createScatterPlot(String title) {
 
         PCAAnalysis pca = new PCAAnalysis();
-        RealMatrix featureMatrix = pca.prepareFeatureMatrix(dataMatrix, clusterIndex, clusterIndex - 2);
+        RealMatrix featureMatrix = pca.prepareFeatureMatrix(dataMatrix, clusterIndex, clusterIndex - 2, normalizePCA);
         RealMatrix covMatrix = pca.covarianceMatrix(featureMatrix);
         RealMatrix principalComponents = pca.performEigenDecomposition(covMatrix, featureMatrix);
         double[] scaleX = pca.findXScale(principalComponents);
