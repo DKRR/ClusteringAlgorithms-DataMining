@@ -77,9 +77,10 @@ public class KMeansMRStarter {
         }
 
         System.out.println("KMeansMR convereged after " + String.valueOf(iterations - 1) + " iterations");
+        double jaccardCoefficient = calaculateJaccardCoefficient();
         printClusters();
         System.out.println("Performing Cluster validation....");
-        System.out.println("Jaccard Coefficient: " + calaculateJaccardCoefficient());
+        System.out.println("Jaccard Coefficient: " + jaccardCoefficient);
         System.out.println("Performing PCA analysis and generating Scatter Plot...");
         createScatterPlot("KMeans Map Reduce");
 
@@ -187,7 +188,7 @@ public class KMeansMRStarter {
     }
 
     public void printClusters() {
-        Map<Double, List<double[]>> clusterMap = new TreeMap<Double, List<double[]>>(Arrays.stream(dataMatrix).filter(x -> x[clusterIndex] != Double.NEGATIVE_INFINITY).
+        Map<Double, List<double[]>> clusterMap = new TreeMap<Double, List<double[]>>(Arrays.stream(dataMatrix).
                 collect(Collectors.groupingBy(x -> x[clusterIndex], Collectors.mapping(x -> x, Collectors.toList()))));
         clusterMap.forEach((x, y) -> {
             System.out.println("Cluster " + Double.valueOf(x).intValue() + " size: " + y.size());
