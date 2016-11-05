@@ -56,15 +56,14 @@ public class RunKMeansMR {
             System.out.println("Do you want to input initial centroids, Please type 'Y' or 'N': ");
             String manual = sc.nextLine();
             List<Integer> geneIds = new ArrayList<Integer>();
-            int k=0;
-            if(manual.equalsIgnoreCase("y")){
+            int k = 0;
+            if (manual.equalsIgnoreCase("y")) {
                 System.out.println("Enter comma separated gene id's: ");
                 String genes = sc.nextLine().replaceAll("\\s+", "");
                 System.out.println(genes);
                 geneIds = Arrays.stream(genes.split(",")).collect(Collectors.mapping(x -> Integer.parseInt(x.trim()), Collectors.toList()));
                 System.out.println(geneIds);
-            }
-            else{
+            } else {
                 System.out.println("Enter No. of Clusters: ");
                 k = sc.nextInt();
             }
@@ -110,10 +109,9 @@ public class RunKMeansMR {
             RunKMeansMR kMeansMR = new RunKMeansMR(k, fileName, maxIter, geneIds);
             double[][] returnedDataMatrix = kMeansMR.readGeneDataSet(inPath);
             double[][] initialKMeans = kMeansMR.initKMeans();
-            if(manual.equalsIgnoreCase("Y")){
+            if (manual.equalsIgnoreCase("Y")) {
                 System.out.println("Initial chosen centroids are:");
-            }
-            else{
+            } else {
                 System.out.println("Randomly chosen initial centroids:");
             }
             Arrays.stream(initialKMeans).forEach(x -> {
@@ -217,6 +215,7 @@ public class RunKMeansMR {
         }
         return kMeans;
     }
+
     public void writeInitialCentroidsToFile(String filePath, String centroidFileName, double[][] initialCentroids) throws Exception {
 
 
@@ -230,8 +229,6 @@ public class RunKMeansMR {
                 try {
 
                     String line = Arrays.stream(singleArray).mapToObj(i -> String.valueOf(i)).collect(Collectors.joining("\t"));
-                    System.out.println(line);
-
                     if (counter.get() != (initialCentroids.length - 1)) {
 
                         writer.append(line + "\n");
